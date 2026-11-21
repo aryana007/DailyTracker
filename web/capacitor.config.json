@@ -1,0 +1,15 @@
+{
+  "appId": "com.dailytracker.app",
+  "appName": "Daily Tracker",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#090D16"
+    }
+  }
+}

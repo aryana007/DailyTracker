@@ -1,0 +1,35 @@
+# Google API Credentials & Auth Tokens (NEVER commit these!)
+credentials.json
+token.json
+
+# Local App Data & Cache
+pending_logs.json
+history_cache.json
+user_settings.json
+
+# Backups & Temp files
+*.bak
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Node / Android Capacitor
+node_modules/
+android/app/build/
+android/.gradle/
+android/build/
+dist/
+
+# OS / Editor / Shortcuts
+*.lnk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Daily Routine & Food Log</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+  </div>
+
+  <div class="app-layout">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-branding">
+        <div class="logo-box">
+          <img src="logo.png" alt="Daily Tracker Logo" class="app-logo">
+          <span class="status-indicator-dot"></span>
+        </div>
+        <div class="branding-text">
+          <div class="title-line">
+            <h1 class="app-title">Daily Tracker</h1>
+            <span id="cloudStatusBadge" class="badge-status">Ready</span>
+          </div>
+          <p class="app-subtitle">Habits, routines & Google Sheets</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="openSheetBtn" class="btn-ghost-sm text-accent" title="Open Live Google Sheet in Browser">
+          <span>Sheets ↗</span>
+        </button>
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme (Dark / Light)">
+          <span class="theme-icon moon-icon">🌙</span>
+          <span class="theme-icon sun-icon hidden">☀️</span>
+        </button>
+        <button id="helpBtn" class="btn-ghost-sm">Help</button>
+      </div>
+    </header>
+
+    <!-- Top Navigation Tabs (Daily Logger vs History Analytics) -->
+    <nav class="nav-tabs">
+      <button id="tabLoggerBtn" class="tab-btn active">
+        <span>📝 Daily Logger</span>
+      </button>
+      <button id="tabHistoryBtn" class="tab-btn">
+        <span>📊 History & Trends</span>
+        <span id="historyCountBadge" class="tab-counter">0</span>
+      </button>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: DAILY LOGGER -->
+    <!-- ========================================== -->
+    <main id="loggerView" class="view-panel">
+
+      <!-- KPI Summary Grid (3 Columns) -->
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <span class="kpi-emoji">🏃</span>
+          <div class="kpi-info">
+            <div class="kpi-val text-blue" id="kpiMovement">0m</div>
+            <div class="kpi-lbl">Active Time</div>
+          </div>
+        </div>
+
+        <div class="kpi-box">
+          <span class="kpi-emoji">💼</span>
+          <div class="kpi-info">
+            <div class="kpi-val text-purple" id="kpiOffice">0.0h</div>
+            <div class="kpi-lbl">Deep Work</div>
+          </div>
+        </div>
+
+        <div class="kpi-box">
+          <span class="kpi-emoji">🍽️</span>
+          <div class="kpi-info">
+            <div class="kpi-val text-emerald" id="kpiMeals">0</div>
+            <div class="kpi-lbl">Meals Logged</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Auto-Fill Status Banner -->
+      <div id="dateNoticeBanner" class="date-notice-banner hidden">
+        <span>ℹ️ Loaded existing record for this date (editing mode)</span>
+      </div>
+
+      <!-- Section 1: Routine & Activity -->
+      <div class="glass-section">
+        <div class="section-title-wrap">
+          <span class="section-eyebrow">ROUTINE & TIME</span>
+          <h2 class="section-title">Daily Metrics</h2>
+        </div>
+
+        <!-- Date Navigator -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">📅</span> Date
+          </label>
+          <div class="row-controls">
+            <button id="prevDayBtn" class="btn-arrow" title="Yesterday">◀</button>
+            <input type="date" id="dateInput" class="input-date">
+            <button id="todayBtn" class="btn-preset text-accent">Today</button>
+            <button id="nextDayBtn" class="btn-arrow" title="Tomorrow">▶</button>
+          </div>
+        </div>
+
+        <!-- Wake Up Time -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">☀️</span> Wake Up
+          </label>
+          <div class="row-controls flex-col-end">
+            <div class="controls-group">
+              <input type="text" id="wakeUpInput" placeholder="07:00 AM" class="input-time">
+              <button id="nowBtn" class="btn-preset text-accent font-bold">Now</button>
+            </div>
+            <div class="presets-wrap">
+              <button class="btn-mini preset-wake" data-time="6:00 AM">6:00</button>
+              <button class="btn-mini preset-wake" data-time="6:30 AM">6:30</button>
+              <button class="btn-mini preset-wake" data-time="7:00 AM">7:00</button>
+              <button class="btn-mini preset-wake" data-time="7:30 AM">7:30</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Running Time Stepper -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">🏃</span> Running
+          </label>
+          <div class="row-controls">
+            <button class="btn-preset preset-run" data-val="15">+15m</button>
+            <button class="btn-preset preset-run" data-val="30">+30m</button>
+            <div class="stepper-widget">
+              <button class="btn-step" id="runMinus">−</button>
+              <input type="number" id="runInput" value="0" min="0" step="5" class="input-stepper">
+              <span class="unit-tag">m</span>
+              <button class="btn-step" id="runPlus">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Walk Time Stepper -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">🚶</span> Walk
+          </label>
+          <div class="row-controls">
+            <button class="btn-preset preset-walk" data-val="15">+15m</button>
+            <button class="btn-preset preset-walk" data-val="30">+30m</button>
+            <div class="stepper-widget">
+              <button class="btn-step" id="walkMinus">−</button>
+              <input type="number" id="walkInput" value="0" min="0" step="5" class="input-stepper">
+              <span class="unit-tag">m</span>
+              <button class="btn-step" id="walkPlus">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Office Time Stepper -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">💼</span> Office Time
+          </label>
+          <div class="row-controls">
+            <button class="btn-preset preset-office" data-val="4">+4h</button>
+            <button class="btn-preset preset-office" data-val="8">8h</button>
+            <div class="stepper-widget">
+              <button class="btn-step" id="officeMinus">−</button>
+              <input type="number" id="officeInput" value="0" min="0" step="0.5" class="input-stepper">
+              <span class="unit-tag">h</span>
+              <button class="btn-step" id="officePlus">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Nutrition & Food -->
+      <div class="glass-section">
+        <div class="section-title-wrap">
+          <span class="section-eyebrow">NUTRITION</span>
+          <h2 class="section-title">Food & Meals Log</h2>
+        </div>
+
+        <!-- Times Eaten Stepper -->
+        <div class="metric-row">
+          <label class="row-label">
+            <span class="label-icon">🍽️</span> Times Eaten
+          </label>
+          <div class="row-controls">
+            <div class="stepper-widget">
+              <button class="btn-step" id="mealMinus">−</button>
+              <input type="number" id="mealCountInput" value="0" min="0" step="1" class="input-stepper">
+              <span class="unit-tag">meals</span>
+              <button class="btn-step" id="mealPlus">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Add Meal Chips -->
+        <div class="chips-container">
+          <div class="chips-header-row">
+            <span class="chips-hint">QUICK ADD ITEMS:</span>
+            <button id="addCustomChipBtn" class="btn-mini text-accent">+ Add Custom Item</button>
+          </div>
+          <div class="chips-list" id="chipsListContainer">
+            <!-- Dynamically populated from user settings -->
+          </div>
+
+          <textarea id="foodTextInput" rows="2" placeholder="What meals or snacks did you have today? (Separate with commas or semicolons)" class="input-textarea"></textarea>
+        </div>
+      </div>
+
+      <!-- Bottom Actions Dock -->
+      <div class="action-dock">
+        <div class="dock-buttons">
+          <button id="saveLocalBtn" class="btn-secondary">
+            <span>💾 Save Offline</span>
+            <span class="kbd-hint">Ctrl+S</span>
+          </button>
+
+          <button id="syncGoogleBtn" class="btn-primary">
+            <span id="syncBtnText">☁️ Sync to Sheets</span>
+            <span class="kbd-hint kbd-primary">Ctrl+↵</span>
+          </button>
+        </div>
+
+        <div class="dock-status-bar">
+          <div class="status-left">
+            <span id="queueIndicatorDot" class="status-dot dot-green"></span>
+            <span id="queueStatusText">Local Queue: All synced</span>
+          </div>
+          <div id="liveStatusText" class="status-right text-emerald">Ready</div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: HISTORY & ANALYTICS -->
+    <!-- ========================================== -->
+    <main id="historyView" class="view-panel hidden">
+
+      <!-- History Top Action Bar -->
+      <div class="glass-section mb-3">
+        <div class="flex-between">
+          <div>
+            <span class="section-eyebrow">DATA & REPORTS</span>
+            <h2 class="section-title">Past Logs & Trends</h2>
+          </div>
+          <div class="row-controls">
+            <button id="exportCsvBtn" class="btn-preset text-accent" title="Download all logs as CSV file">
+              📥 Export CSV
+            </button>
+            <button id="openSheetSecondaryBtn" class="btn-preset" title="Open Live Google Sheet in Browser">
+              🔗 Open Sheet ↗
+            </button>
+          </div>
+        </div>
+
+        <!-- 7-Day Trend Chart -->
+        <div class="trend-chart-box">
+          <div class="chart-header">
+            <span>RECENT 7-DAY ACTIVITY TREND (MINS)</span>
+            <span class="text-blue" id="weeklyMovementTotal">0m total</span>
+          </div>
+          <div class="chart-bars" id="trendChartBars">
+            <!-- Dynamically generated bars -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Past Logs List Container -->
+      <div class="history-list-section">
+        <div class="history-list-header">
+          <span>PAST LOGGED DAYS</span>
+          <span id="historyTotalLabel" class="text-xs text-muted">0 entries</span>
+        </div>
+        <div class="history-cards-scroll" id="historyCardsContainer">
+          <div class="history-empty-state">
+            <span>No previous logs found. Log your first day above!</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Non-Intrusive Floating Toast -->
+  <div id="toastNotification" class="toast-pill hidden">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Saved to local queue!</span>
+  </div>
+
+  <!-- Help & Guide Modal -->
+  <div id="helpModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">📘 Daily Tracker Guide</h3>
+        <button id="closeHelpModal" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="guide-item">
+          <h4>1. Two-Way Sync & Smart Auto-Fill</h4>
+          <p>When you select a date (or click ◀ / ▶), the app automatically checks if you already logged anything for that day and pre-fills it so you never lose progress.</p>
+        </div>
+        <div class="guide-item">
+          <h4>2. History & Trends Tab</h4>
+          <p>Switch to the <strong>History & Trends</strong> tab to view a 7-day movement chart, inspect past days, and edit previous entries with 1 click.</p>
+        </div>
+        <div class="guide-item">
+          <h4>3. Google Sheets Live Link</h4>
+          <p>Click <strong>Sheets ↗</strong> in the header to open your live Google Sheet in your web browser immediately.</p>
+        </div>
+        <div class="guide-item">
+          <h4>4. Custom Quick-Add Chips</h4>
+          <p>Click <strong>+ Add Custom Item</strong> to add your own favorite meals or snacks to the quick-add chip list.</p>
+        </div>
+        <div class="guide-item">
+          <h4>5. Ready for Android APK</h4>
+          <p>This entire frontend is mobile-first and configured for 1-command compilation into an Android APK with Capacitor.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="dismissHelpModalBtn" class="btn-primary btn-modal-dismiss">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
